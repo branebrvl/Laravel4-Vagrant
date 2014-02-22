@@ -1,4 +1,4 @@
-# Laravel 4 w/ Vagrant
+# Laravel 4 Vagrant
 
 ## Tasks:
 

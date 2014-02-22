@@ -17,9 +17,9 @@
 # - create laravel local env files and settings 
 # - crate mysql database and set laravel db config
 # - set apache user and group to vagrant so it can rw to app/storage
-# - set up apache vhost for vagrant folder, so you can access the server as: myapp.192.168.33.15.xip.io
+# - set up apache vhost for vagrant folder, so you can access the server as: 192.168.33.10.xip.io
 # - to use SauceLab connect to test your local instance edit your host file
-# 127.0.0.1 192.168.33.15
+# 127.0.0.1 192.168.33.10
 
 # Colors
 ESC_SEQ="\x1b["
