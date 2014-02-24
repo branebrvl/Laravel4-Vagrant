@@ -78,7 +78,7 @@ if [ ! -f "/vagrant/composer.json" ]; then
   echo -e "\n$COL_PURPLE Performing Composer create-project, this may take some time, grab a coffee...\n$COL_RESET"
   # sudo composer create-project laravel/laravel --prefer-dist
   git clone https://github.com/laravel/laravel.git tmp && mv tmp/.git . && rm -rf tmp && git reset --hard && rm -rf .git
-  rm readme.md
+  rm readme.md 
 
   # create application todo file
   echo "$laravel_root_folder README:" > README.md
@@ -90,8 +90,6 @@ if [ ! -f "/vagrant/composer.json" ]; then
   echo -e "\n"
   echo -e "-- Adding $COL_GREEN Way/Generators, itsgoingd/clockwork, PHPUnit$COL_RESET and$COL_GREEN Faker$COL_RESET Libraries to $COL_YELLOW$laravel_root_folder$COL_RESET"
   sed -i '8 a\ \t"require-dev" : { \n \t\t"way/generators": "dev-master", \n \t\t"phpunit/phpunit": "3.7.*", \n \t\t"itsgoingd/clockwork": "dev-master", \n \t\t"fzaninotto/faker": "dev-master" \n\t},' composer.json
-  sed -i "109 a\ \t\t'Way\\\Generators\\\GeneratorsServiceProvider'," app/config/app.php
-  sed -i "110 a\ \t\t'Clockwork\\\Support\\\Laravel\\\ClockworkServiceProvider'," app/config/app.php
   echo -e "\n$COL_PURPLE Performing Composer Update with new dependencies...\n$COL_RESET"
   sudo composer update
   echo -e "\n"
@@ -104,7 +102,7 @@ if [ ! -f "/vagrant/composer.json" ]; then
 
   # Update app/bootstrap/start.php with env function
   sed -i -e'27,31d' bootstrap/start.php
-  sed -i "26 a\ \$env = \$app->detectEnvironment(function() { return getenv('LARAVEL_ENV') ?: 'local'; });" bootstrap/start.php
+  sed -i "26 a\ \$env = \$app->detectEnvironment(function() { return getenv('LARAVEL4_ENV') ?: 'local'; });" bootstrap/start.php
 
   # Set up local database and service providers for way/generators and clockwork
   mkdir app/config/local
@@ -157,6 +155,15 @@ EOF
           'L4_DB_PASSWORD'  => '$passworddb', 
   ];
 EOF
+
+  cat <<EOF > .env.production.php
+  <?php return [
+          'L4_DB_HOST'      => '',     
+          'L4_DB_DATABASE'  => '',
+          'L4_DB_USERNAME'  => '', 
+          'L4_DB_PASSWORD'  => '', 
+  ];
+EOF
 # end of 'is laravel installed' if statement
 fi
 
@@ -172,6 +179,14 @@ if [ $APACHE_IS_INSTALLED -eq 0 ]; then
     vhost -s $1.xip.io -d "/vagrant/public"
     sudo service apache2 reload
 fi
+
+# Move livereload and less files to public folder, initiate npm and bower install and run grunt watch
+# watch logs will be stored in the tmp folder
+cd /vagrant
+cp -r grunt-watch-less-livereload/ public/ && rm -rf grunt-watch-less-livereload
+npm install && bower install
+grunt watch > tmp/watch.log & 
+
 
 echo -e "\n $COL_PURPLE Setup Complete!\n $COL_RESET"
 echo -e "\n $COL_PURPLE You can see you app if you navigate your browser to $ip_address.xip.io\n $COL_RESET"
