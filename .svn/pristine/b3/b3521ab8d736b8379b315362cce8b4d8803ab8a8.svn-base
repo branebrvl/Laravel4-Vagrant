@@ -10,7 +10,9 @@
 #   + way/generators https://github.com/JeffreyWay/Laravel-4-Generators
 #   + itsgoingd/clockwork https://github.com/itsgoingd/clockwork
 #   + fzaninotto/faker https://github.com/fzaninotto/Faker
-# - set aliases and service # - set clockwork files in app/start/local.php
+#   + phpunit/phpunit https://github.com/sebastianbergmann/phpunit
+# - set aliases and service providers
+# - set clockwork files in app/start/local.php
 #   + now you can debug you app by using console logs by typing: l('log this')
 # - create laravel local env files and settings 
 # - crate mysql database and set laravel db config
@@ -96,10 +98,10 @@ if [ ! -f "/vagrant/composer.json" ]; then
   # set local timezone
   sed -i "s/'timezone' => 'UTC',/'timezone' => 'America\/Los_Angeles',/g" app/config/app.php
 
-  # Install and Configure way/generators, itsgoingd/clockwork, fzaninotto/faker packages
+  # Install and Configure way/generators, itsgoingd/clockwork, fzaninotto/faker, phpunit/phpunit packages
   echo -e "\n"
-  echo -e "-- Adding $COL_GREEN Way/Generators, itsgoingd/clockwork$COL_RESET and$COL_GREEN Faker$COL_RESET Libraries to $COL_YELLOW$laravel_root_folder$COL_RESET"
-  sed -i '8 a\ \t"require-dev" : { \n \t\t"way/generators": "dev-master", \n \t\t"itsgoingd/clockwork": "dev-master", \n \t\t"fzaninotto/faker": "dev-master" \n\t},' composer.json
+  echo -e "-- Adding $COL_GREEN Way/Generators, itsgoingd/clockwork, PHPUnit$COL_RESET and$COL_GREEN Faker$COL_RESET Libraries to $COL_YELLOW$laravel_root_folder$COL_RESET"
+  sed -i '8 a\ \t"require-dev" : { \n \t\t"way/generators": "dev-master", \n \t\t"phpunit/phpunit": "3.7.*", \n \t\t"itsgoingd/clockwork": "dev-master", \n \t\t"fzaninotto/faker": "dev-master" \n\t},' composer.json
   sed -i "109 a\ \t\t'Way\\\Generators\\\GeneratorsServiceProvider'," app/config/app.php
   sed -i "110 a\ \t\t'Clockwork\\\Support\\\Laravel\\\ClockworkServiceProvider'," app/config/app.php
   echo -e "\n$COL_PURPLE Performing Composer Update with new dependencies...\n$COL_RESET"
@@ -176,20 +178,12 @@ cat <<EOF > .env.production.php
           'L4_DB_PASSWORD'  => '', 
   ];
 EOF
-
-else
-    echo ">>> Installing Composer Packages:"
-    sudo composer install
-fi
 # end of 'is laravel installed' if statement
-
+fi
 
 # Create mysql database
 echo "-- Creating MySQL database"
 mysql -uroot -p$passworddb -e "CREATE DATABASE \`$database\`"
-# add a user that can connect from anywhere
-mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '' WITH GRANT OPTION; FLUSH PRIVILEGES;"
-sudo /etc/init.d/mysql restart
 
 # Create new apache vhost
 if [ $APACHE_IS_INSTALLED -eq 0 ]; then

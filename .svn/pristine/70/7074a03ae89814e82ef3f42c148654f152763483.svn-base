@@ -10,7 +10,8 @@
 #   + way/generators https://github.com/JeffreyWay/Laravel-4-Generators
 #   + itsgoingd/clockwork https://github.com/itsgoingd/clockwork
 #   + fzaninotto/faker https://github.com/fzaninotto/Faker
-# - set aliases and service # - set clockwork files in app/start/local.php
+# - set aliases and service providers
+# - set clockwork files in app/start/local.php
 #   + now you can debug you app by using console logs by typing: l('log this')
 # - create laravel local env files and settings 
 # - crate mysql database and set laravel db config
@@ -176,13 +177,8 @@ cat <<EOF > .env.production.php
           'L4_DB_PASSWORD'  => '', 
   ];
 EOF
-
-else
-    echo ">>> Installing Composer Packages:"
-    sudo composer install
-fi
 # end of 'is laravel installed' if statement
-
+fi
 
 # Create mysql database
 echo "-- Creating MySQL database"
