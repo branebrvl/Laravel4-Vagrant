@@ -11,8 +11,9 @@ github_branch   = "master"
 #   10.0.0.1    - 10.255.255.254
 #   172.16.0.1  - 172.31.255.254
 #   192.168.0.1 - 192.168.255.254
-server_ip             = "192.168.33.10"
-server_memory         = "384" # MB
+server_ip             = "192.168.33.33"
+server_memory         = "2048" # MB //384
+server_cpus           = "4"
 server_timezone       = "UTC"
 
 # Database Configuration
@@ -43,15 +44,15 @@ composer_packages     = [        # List any global Composer packages that you wa
   "phpspec/phpspec:2.0.*@dev"
 ]
 public_folder         = "/vagrant" # If installing Symfony or Laravel, leave this blank to default to the framework public directory
-laravel_root_folder   = "/vagrant/laravel" # Where to install Laravel. Will `composer install` if a composer.json file exists
+laravel_root_folder   = "/vagrant" # Where to install Laravel. Will `composer install` if a composer.json file exists
 laravel_db_name       = "laraveldb"
 symfony_root_folder   = "/vagrant/symfony" # Where to install Symfony.
 nodejs_version        = "latest"   # By default "latest" will equal the latest stable version
 nodejs_packages       = [          # List any global NodeJS packages that you want to install
   "grunt-cli",
   #"gulp",
-  "bower"
-  #"yo",
+  "bower",
+  "yo"
 ]
 
 Vagrant.configure("2") do |config|
@@ -70,25 +71,29 @@ Vagrant.configure("2") do |config|
 
   # Forwarding ports 9000 and 35729 so that grunt can serve and live-reload the app to the host. 
   # Another way to get that to happen is to start an ssh tunnel into the VM with something like: vagrant ssh -- -L 9000:localhost:9000 -L 35729:localhost:35729 -N
-  # config.vm.network :forwarded_port, guest: 9000, host: 9000
-  # config.vm.network :forwarded_port, guest: 35729, host: 35729
+  config.vm.network :forwarded_port, guest: 9000, host: 9000
+  config.vm.network :forwarded_port, guest: 9001, host: 9001
+  config.vm.network :forwarded_port, guest: 35729, host: 35729
+
+  config.ssh.forward_agent = true
 
   # Create a static IP
   config.vm.network :private_network, ip: server_ip
   # Use 777 for the shared folder
-  config.vm.synced_folder ".", "/vagrant", {:mount_options => ['dmode=777','fmode=777']}
+  # config.vm.synced_folder ".", "/vagrant", {:mount_options => ['dmode=777','fmode=777']}
 
   # Use NFS for the shared folder
-  # config.vm.synced_folder ".", "/vagrant",
-  #           id: "core",
-  #           :nfs => true,
-  #           :mount_options => ['nolock,vers=3,udp,noatime']
+  config.vm.synced_folder ".", "/vagrant",
+            id: "core",
+            :nfs => true,
+            :mount_options => ['nolock,vers=3,udp,noatime']
 
   # If using VirtualBox
   config.vm.provider :virtualbox do |vb|
 
     # Set server memory
     vb.customize ["modifyvm", :id, "--memory", server_memory]
+    vb.customize ["modifyvm", :id, "--cpus", server_cpus]
 
     # Set the timesync threshold to 10 seconds, instead of the default 20 minutes.
     # If the clock gets more than 15 minutes out of sync (due to your laptop going
@@ -170,7 +175,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/pgsql.sh", args: pgsql_root_password
 
   # Provision SQLite
-  # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/sqlite.sh"
+  config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/sqlite.sh"
 
   # Provision Couchbase
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/couchbase.sh"
@@ -179,7 +184,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/couchdb.sh"
 
   # Provision MongoDB
-  # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/mongodb.sh"
+  config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/mongodb.sh"
 
   # Provision MariaDB
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/mariadb.sh", args: [mariadb_root_password, mariadb_version]
@@ -236,11 +241,11 @@ Vagrant.configure("2") do |config|
   # Additional Languages
   ##########
 
-  # Install Nodejs
-  config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/nodejs.sh", privileged: false, args: nodejs_packages.unshift(nodejs_version)
-
   # Install Ruby Version Manager (RVM)
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/rvm.sh", privileged: false, args: ruby_gems.unshift(ruby_version)
+
+  # Install Nodejs
+  config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/nodejs.sh", privileged: false, args: nodejs_packages.unshift(nodejs_version)
 
   ####
   # Frameworks and Tooling
@@ -256,21 +261,22 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/symfony.sh", args: [server_ip, symfony_root_folder, public_folder]
 
   # Install Screen
-  # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/screen.sh"
+  config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/screen.sh"
 
   # Install Mailcatcher
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/mailcatcher.sh"
 
   # Install git-ftp
   # config.vm.provision "shell", path: "https://raw.github.com/#{github_username}/#{github_repo}/#{github_branch}/scripts/git-ftp.sh", privileged: false
-
   ####
   # Local Scripts
   # Any local scripts you may want to run post-provisioning.
   # Add these to the same directory as the Vagrantfile.
   ##########
-  config.vm.provision "shell", path: "laravelsetup.sh", args: [server_ip, laravel_root_folder, laravel_db_name, mysql_root_password ]
   config.vm.provision "shell", path: "phantominstall.sh"
+  config.vm.provision "shell", path: "laravelsetup.sh", args: [server_ip, laravel_root_folder, laravel_db_name, mysql_root_password ]
   # config.vm.provision "shell", path: "setupdotfiles.sh"
+
+
 
 end
