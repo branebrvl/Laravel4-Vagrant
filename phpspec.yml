@@ -1,0 +1,8 @@
+suites:
+  photoupload_suite:
+    namespace: Evolve 
+    src_path: app
+    spec_path: app
+    spec_prefix: spec
+
+formatter.name: pretty
