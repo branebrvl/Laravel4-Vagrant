@@ -39,7 +39,7 @@ else
 fi
 
 if [ -z "$2" ]; then
-      laravel_root_folder="laravel"
+      laravel_root_folder="/vagrant"
 else
       laravel_root_folder="$2"
 fi
@@ -216,7 +216,7 @@ if [ $APACHE_IS_INSTALLED -eq 0 ]; then
     sudo rm /etc/apache2/sites-enabled/$ip_address.xip.io.conf > /dev/null 2>&1
     sudo rm /etc/apache2/sites-available/$ip_address.xip.io.conf > /dev/null 2>&1
     sudo vhost -s $1.xip.io -d "$laravel_root_folder/public"
-    sudo sed -i 's/.*DocumentRoot.*/SetEnv LARAVEL_ENV local\n&/' /etc/apache2/sites-available/$ip_address.xip.io.conf
+    sudo sed -i 's/.*DocumentRoot.*/SetEnv LARAVEL4_ENV local\n&/' /etc/apache2/sites-available/$ip_address.xip.io.conf
     sudo service apache2 reload
 fi
 
